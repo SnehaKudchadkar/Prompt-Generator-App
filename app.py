@@ -5,6 +5,8 @@ st.set_page_config(page_title="Prompt Generator", page_icon="✨", layout="cente
 # Session state for usage tracking
 if "usage_count" not in st.session_state:
     st.session_state.usage_count = 0
+if "history" not in st.session_state:
+    st.session_state.history = []  # store generated prompts
 
 st.title("✨ High-Quality Prompt Generator")
 st.write("Generate powerful, specific, and unique prompts in under a minute!")
@@ -23,17 +25,35 @@ if st.session_state.usage_count < 3:
 
         submitted = st.form_submit_button("Generate Prompt")
 
-        if submitted:
-            st.session_state.usage_count += 1
-            prompt = f"""
-            You are an expert in {purpose}. Generate a {output_type} about **{topic}**. 
-            Write it in a {tone.lower()} style for {audience}.
-            {extra if extra else ""}
-            Make it unique, specific, and high-quality.
-            """
-            st.success("✅ Your optimized prompt is ready!")
-            st.code(prompt, language="markdown")
-            st.button("📋 Copy Prompt")
+    if submitted:
+        st.session_state.usage_count += 1
+        prompt = f"""
+You are an expert in {purpose}. Generate a {output_type} about **{topic}**. 
+Write it in a {tone.lower()} style for {audience}.
+{extra if extra else ""}
+Make it unique, specific, and high-quality.
+"""
+        st.success("✅ Your optimized prompt is ready!")
+        st.code(prompt, language="markdown")
+
+        # Save to history
+        st.session_state.history.append(prompt)
+
+        # Safe alternative to copy button → download as text
+        st.download_button(
+            label="📋 Copy / Download Prompt",
+            data=prompt,
+            file_name="prompt.txt",
+            mime="text/plain"
+        )
 else:
     st.error("You’ve used 3 free prompts. 🚀 Upgrade to continue.")
     st.write("💳 Future: Buy prompt packs or subscribe for unlimited access.")
+
+# Show prompt history (if any)
+if st.session_state.history:
+    st.markdown("---")
+    st.subheader("📝 Prompt History")
+    for i, h in enumerate(st.session_state.history, 1):
+        with st.expander(f"Prompt {i}"):
+            st.code(h, language="markdown")
