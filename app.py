@@ -28,10 +28,29 @@ if st.session_state.usage_count < 3:
     if submitted:
         st.session_state.usage_count += 1
         prompt = f"""
-You are an expert in {purpose}. Generate a {output_type} about **{topic}**. 
-Write it in a {tone.lower()} style for {audience}.
-{extra if extra else ""}
-Make it unique, specific, and high-quality.
+You are an expert in {purpose}.  
+Generate a {output_type} about **{topic}**.  
+
+✅ Writing Style & Tone  
+- Write in a {tone.lower()} style suitable for {audience}.  
+- Ensure the tone matches the context (professional, creative, persuasive, educational, etc.).  
+- Balance clarity with depth to keep it engaging.  
+
+✅ Structure & Quality  
+- Begin with a strong hook/introduction.  
+- Organize content with clear sections, bullet points, or short paragraphs where relevant.  
+- Provide unique insights, examples, or storytelling (not generic filler).  
+- Ensure logical flow and coherence from start to end.  
+
+✅ Language & Readability  
+- Use precise, easy-to-read language.  
+- Avoid repetition, jargon, or unnecessary complexity.  
+- Keep sentences short and impactful.  
+
+✅ Final Touch  
+- Add a concise conclusion or call-to-action tailored for {audience}.  
+- Make the piece unique, specific, and high-quality — something valuable enough for publishing or sharing.  
+
 """
         st.success("✅ Your optimized prompt is ready!")
         st.code(prompt, language="markdown")
