@@ -2,6 +2,9 @@
 
 A simple, professional, and user-friendly **Prompt Generator** built with Streamlit.
 
+## Link to the app
+https://prompt-generator-app.streamlit.app/
+
 ## Features
 - 5–6 easy questions → Generates high-quality prompts.
 - Free usage: 3 prompts.
