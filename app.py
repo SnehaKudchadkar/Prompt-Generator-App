@@ -1,13 +1,17 @@
 import streamlit as st
-from openai import OpenAI
+from transformers import pipeline
 
-# Initialize client
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# Load Hugging Face model (GPT-2)
+@st.cache_resource
+def load_model():
+    return pipeline("text-generation", model="gpt2")
+
+generator = load_model()
 
 st.set_page_config(page_title="AI Prompt Generator", page_icon="✨", layout="centered")
 
-st.title("✨ AI-Powered Prompt Generator")
-st.write("Answer a few quick questions, and I’ll generate a **high-quality, optimized prompt** for you.")
+st.title("✨ Free AI-Powered Prompt Generator")
+st.write("Answer a few questions, and I’ll generate a **high-quality, optimized prompt** for you — completely free!")
 
 # --- User Inputs ---
 purpose = st.text_input("🎯 What is the purpose? (e.g., marketing, storytelling, education)")
@@ -29,26 +33,17 @@ if st.button("🚀 Generate Optimized Prompt"):
         Extra Instructions: {extra if extra else "None"}
         """
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are an expert prompt engineer."},
-                {"role": "user", "content": f"""
-                Based on the following inputs, create a highly detailed, professional prompt
-                that will generate unique, specific, and high-quality {output_type}.
-
-                {user_inputs}
-
-                The generated prompt should:
-                - Give clear structure (intro, body, conclusion if needed).
-                - Include style, readability, and uniqueness instructions.
-                - Be ready to copy-paste directly into an AI model.
-                """}
-            ],
-            temperature=0.7
+        # Generate prompt using Hugging Face GPT-2
+        result = generator(
+            f"You are an expert prompt engineer. Create a detailed, professional AI prompt based on the following inputs:\n{user_inputs}\n\nThe generated prompt should:",
+            max_length=300,
+            num_return_sequences=1,
+            do_sample=True,
+            temperature=0.7,
+            top_p=0.9
         )
 
-        final_prompt = response.choices[0].message.content
+        final_prompt = result[0]["generated_text"]
 
         st.success("✅ Your optimized prompt is ready!")
         st.text_area("📋 Copy your prompt below:", value=final_prompt, height=300)
