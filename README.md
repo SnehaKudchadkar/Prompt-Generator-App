@@ -18,7 +18,7 @@ streamlit run app.py
 - Or host on GitHub → Streamlit → Deploy directly.
 
 ## 🔮 Future Scope
-# 📂 Save prompt history per client (login system).
-# 🎨 Add templates (marketing, storytelling, coding, etc.).
-# 🤖 Integration with OpenAI API → directly get AI output.
-# 📊 Analytics dashboard (track usage, popular prompt types).
+- 📂 Save prompt history per client (login system).
+- 🎨 Add templates (marketing, storytelling, coding, etc.).
+- 🤖 Integration with OpenAI API → directly get AI output.
+- 📊 Analytics dashboard (track usage, popular prompt types).
