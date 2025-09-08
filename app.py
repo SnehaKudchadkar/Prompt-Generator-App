@@ -1,78 +1,55 @@
 import streamlit as st
+from openai import OpenAI
 
-st.set_page_config(page_title="Prompt Generator", page_icon="✨", layout="centered")
+# Initialize client
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Session state for usage tracking
-if "usage_count" not in st.session_state:
-    st.session_state.usage_count = 0
-if "history" not in st.session_state:
-    st.session_state.history = []  # store generated prompts
+st.set_page_config(page_title="AI Prompt Generator", page_icon="✨", layout="centered")
 
-st.title("✨ High-Quality Prompt Generator")
-st.write("Generate powerful, specific, and unique prompts in under a minute!")
+st.title("✨ AI-Powered Prompt Generator")
+st.write("Answer a few quick questions, and I’ll generate a **high-quality, optimized prompt** for you.")
 
-if st.session_state.usage_count < 3:
-    with st.form("prompt_form"):
-        purpose = st.selectbox("1. What do you need the prompt for?", 
-                               ["Blog", "Ad/Marketing", "Code", "Story", "Data Analysis", "Other"])
-        topic = st.text_input("2. What’s the exact topic/subject?")
-        tone = st.selectbox("3. Desired style/tone:", 
-                            ["Professional", "Casual", "Persuasive", "Storytelling", "Funny", "Other"])
-        audience = st.text_input("4. Who is the target audience?")
-        output_type = st.selectbox("5. Expected output:", 
-                                   ["Article", "List", "Step-by-step", "Creative Story", "Code", "Other"])
-        extra = st.text_area("6. Any extra details? (Optional)")
+# --- User Inputs ---
+purpose = st.text_input("🎯 What is the purpose? (e.g., marketing, storytelling, education)")
+output_type = st.text_input("📝 What type of output do you need? (e.g., blog, LinkedIn post, email, ad copy)")
+topic = st.text_input("📌 What’s the main topic? (e.g., AI in education, my PM journey)")
+audience = st.text_input("👥 Who is the target audience? (e.g., recruiters, students, CEOs)")
+tone = st.text_input("🎨 What tone should it have? (e.g., professional, casual, storytelling, persuasive)")
+extra = st.text_area("✨ Any extra instructions? (Optional)")
 
-        submitted = st.form_submit_button("Generate Prompt")
+# --- Generate Prompt ---
+if st.button("🚀 Generate Optimized Prompt"):
+    with st.spinner("Crafting your optimized prompt..."):
+        user_inputs = f"""
+        Purpose: {purpose}
+        Output Type: {output_type}
+        Topic: {topic}
+        Audience: {audience}
+        Tone: {tone}
+        Extra Instructions: {extra if extra else "None"}
+        """
 
-    if submitted:
-        st.session_state.usage_count += 1
-        prompt = f"""
-You are an expert in {purpose}.  
-Generate a {output_type} about **{topic}**.  
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are an expert prompt engineer."},
+                {"role": "user", "content": f"""
+                Based on the following inputs, create a highly detailed, professional prompt
+                that will generate unique, specific, and high-quality {output_type}.
 
-✅ Writing Style & Tone  
-- Write in a {tone.lower()} style suitable for {audience}.  
-- Ensure the tone matches the context (professional, creative, persuasive, educational, etc.).  
-- Balance clarity with depth to keep it engaging.  
+                {user_inputs}
 
-✅ Structure & Quality  
-- Begin with a strong hook/introduction.  
-- Organize content with clear sections, bullet points, or short paragraphs where relevant.  
-- Provide unique insights, examples, or storytelling (not generic filler).  
-- Ensure logical flow and coherence from start to end.  
-
-✅ Language & Readability  
-- Use precise, easy-to-read language.  
-- Avoid repetition, jargon, or unnecessary complexity.  
-- Keep sentences short and impactful.  
-
-✅ Final Touch  
-- Add a concise conclusion or call-to-action tailored for {audience}.  
-- Make the piece unique, specific, and high-quality — something valuable enough for publishing or sharing.  
-
-"""
-        st.success("✅ Your optimized prompt is ready!")
-        st.code(prompt, language="markdown")
-
-        # Save to history
-        st.session_state.history.append(prompt)
-
-        # Safe alternative to copy button → download as text
-        st.download_button(
-            label="📋 Copy / Download Prompt",
-            data=prompt,
-            file_name="prompt.txt",
-            mime="text/plain"
+                The generated prompt should:
+                - Give clear structure (intro, body, conclusion if needed).
+                - Include style, readability, and uniqueness instructions.
+                - Be ready to copy-paste directly into an AI model.
+                """}
+            ],
+            temperature=0.7
         )
-else:
-    st.error("You’ve used 3 free prompts. 🚀 Upgrade to continue.")
-    st.write("💳 Future: Buy prompt packs or subscribe for unlimited access.")
 
-# Show prompt history (if any)
-if st.session_state.history:
-    st.markdown("---")
-    st.subheader("📝 Prompt History")
-    for i, h in enumerate(st.session_state.history, 1):
-        with st.expander(f"Prompt {i}"):
-            st.code(h, language="markdown")
+        final_prompt = response.choices[0].message.content
+
+        st.success("✅ Your optimized prompt is ready!")
+        st.text_area("📋 Copy your prompt below:", value=final_prompt, height=300)
+
